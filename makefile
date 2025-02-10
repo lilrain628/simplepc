@@ -3,14 +3,12 @@ OBJDIR = ../simple-computer/build
 CC = gcc
 CFLAGS = -Wall -Wextra -g
 
-SRCS = $(wildcard $(SRCDIR)/*.c)
-OBJS = $(patsubst $(SRCDIR)/%.c, $(OBJDIR)/%.o, $(SRCS))
-TARGET = test
+PROGRAMS = test test1 test3
 
-all: $(TARGET)
+all: $(PROGRAMS) run
 
-$(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) $^ -o $@
+$(PROGRAMS): %: $(OBJDIR)/%.o
+	$(CC) $(CFLAGS) $< -o $@
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.c | $(OBJDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -18,7 +16,14 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c | $(OBJDIR)
 $(OBJDIR):
 	mkdir -p $(OBJDIR)
 
-clean:
-	rm -rf $(OBJDIR) $(TARGET)
+run: $(PROGRAMS)
+	@for prog in $(PROGRAMS); do \
+		echo "$$prog"; \
+		./$$prog; \
+		echo " "; \
+	done
 
-.PHONY: all clean
+clean:
+	rm -rf $(OBJDIR) $(PROGRAMS)
+
+.PHONY: all clean run

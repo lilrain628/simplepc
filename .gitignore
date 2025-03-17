@@ -1,0 +1,13 @@
+# Игнорировать объектные файлы
+*.o
+
+# Игнорировать исполняемые файлы
+pr01
+
+# Игнорировать статические библиотеки
+*.a
+
+# Игнорировать папку с бинарными файлами
+mySimpleComputer/*.o
+mySimpleComputer/pr01
+mySimpleComputer/libmySimpleComputer.a

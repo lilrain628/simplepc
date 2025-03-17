@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: sudo apt-get install -y build-essential
+
+      - name: Build project
+        run: |
+          cd mySimpleComputer
+          make
+
+      - name: Run tests
+        run: |
+          cd mySimpleComputer
+          make run

@@ -1,30 +1,16 @@
-name: CI
+image: registry.csc.sibsutis.ru/ci/git-clang-format:latest
+stages:
+  - check-format
+  - build
+  - test
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+check-format:
+  stage: check-format
+  script:
+    - find . -type f -name '*.[ch]' | xargs clang-format --style GNU -i --verbose
+    - git diff --exit-code
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Install dependencies
-        run: sudo apt-get install -y build-essential
-
-      - name: Build project
-        run: |
-          cd mySimpleComputer
-          make
-
-      - name: Run tests
-        run: |
-          cd mySimpleComputer
-          make run
+build:
+  stage: build
+  script:
+    - make

@@ -10,7 +10,7 @@ int main() {
     // b
     sc_memorySet(0, 0x1234);
     sc_memorySet(1, 0x5678);
-    sc_memorySet(2, 0x9ABC);
+    sc_memorySet(2, -0x9ABC);
 
     printf("Memory contents:\n");
     for (int i = 0; i < 130; i++) { // Выводим 13 строк по 10 ячеек

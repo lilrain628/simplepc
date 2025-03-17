@@ -1,11 +1,14 @@
 #include "mySimpleComputer.h"
 static int memory[128];
 
-int sc_memoryInit (void){
-    for (int i = 0; i < 128; i++) {
-        memory[i] = 0; 
+int
+sc_memoryInit (void)
+{
+  for (int i = 0; i < 128; i++)
+    {
+      memory[i] = 0;
     }
-    return 0;
+  return 0;
 }
 
 int sc_memorySet(int address, int value) {

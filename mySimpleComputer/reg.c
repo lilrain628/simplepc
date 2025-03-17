@@ -8,21 +8,24 @@ int sc_regInit(void) {
     return 0;
 }
 
-int sc_regSet(int reg, int value) {
-    if (reg != FLAG_OVERFLOW &&
-        reg != FLAG_DIVISION_BY_ZERO &&
-        reg != FLAG_MEMORY_ERROR &&
-        reg != FLAG_INVALID_COMMAND &&
-        reg != FLAG_IGNORE_CLOCK) {
-        return -1;
+int
+sc_regSet (int reg, int value)
+{
+  if (reg != FLAG_OVERFLOW && reg != FLAG_DIVISION_BY_ZERO
+      && reg != FLAG_MEMORY_ERROR && reg != FLAG_INVALID_COMMAND
+      && reg != FLAG_IGNORE_CLOCK)
+    {
+      return -1;
     }
-
-    if (value) {
-        flag_register |= reg;
-    } else {
-        flag_register &= ~reg;
+  if (value)
+    {
+      flag_register |= reg;
     }
-    return 0;
+  else
+    {
+      flag_register &= ~reg;
+    }
+  return 0;
 }
 
 int sc_regGet(int reg, int *value) {

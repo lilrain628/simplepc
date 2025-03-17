@@ -11,3 +11,4 @@ pr01
 mySimpleComputer/*.o
 mySimpleComputer/pr01
 mySimpleComputer/libmySimpleComputer.a
+.vscode/

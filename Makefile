@@ -21,17 +21,17 @@ $(LIB_DIR):
 	mkdir -p $(LIB_DIR)
 
 $(LIB_TARGET): $(OBJS) | $(LIB_DIR)
-	@echo "Создание библиотеки $@"
+#	@echo "Создание библиотеки $@"
 	$(AR) $(ARFLAGS) $@ $^
-	@echo "Содержимое библиотеки:"
+#	@echo "Содержимое библиотеки:"
 	ar -t $@
 
 $(PR01_TARGET): $(PR01_OBJ) $(LIB_TARGET)
-	@echo "Сборка программы $@"
+#	@echo "Сборка программы $@"
 	$(CC) $(CFLAGS) -o $@ $(PR01_OBJ) -L$(LIB_DIR) -lmySimpleComputer
 
 %.o: %.c
-	@echo "Компиляция $<"
+#	@echo "Компиляция $<"
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
@@ -40,5 +40,5 @@ clean:
 	rm -rf $(LIB_DIR)/*.o $(LIB_DIR)/*.a $(LIB_DIR)/*.bin $(LIB_DIR)/*.lib
 
 run: $(PR01_TARGET)
-	@echo "Запуск программы $(PR01_TARGET)"
+#	@echo "Запуск программы $(PR01_TARGET)"
 	./$(PR01_TARGET)

@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "../include/myTerm.h"
 // Память
 #define MEMORY_SIZE 128
 
@@ -36,7 +37,9 @@ int sc_commandEncode (int sign, int command, int operand, int *value);
 int sc_commandDecode (int value, int *sign, int *command, int *operand);
 int sc_commandValidate (int command);
 
-void printCell (int address);
+void printCell(int address, enum colors fg, enum colors bg);
+void printTerm(int address, int input);
+void printCommand(void);
 void printFlags (void);
 void printDecodedCommand (int value);
 void printAccumulator (void);

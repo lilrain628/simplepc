@@ -1,23 +1,25 @@
-image: registry.csc.sibsutis.ru/ci/git-clang-format:latest
+image: ubuntu:latest
+
 stages:
   - check-format
   - build
   - test
 
+before_script:
+  - apt-get update
+  - apt-get install -y clang-format
+
 check-format:
   stage: check-format
   script:
-    - find . -type f -name '*.[ch]' | xargs clang-format --style GNU -i --verbose
-    - git diff --exit-code
+    - find . -type f -name '*.[ch]' | xargs clang-format --style GNU --dry-run --Werror
 
 build:
   stage: build
   script:
     - make
-    
+
 test:
   stage: test
   script:
     - make test
-  dependencies:
-    - build

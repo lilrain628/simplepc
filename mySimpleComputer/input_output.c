@@ -1,134 +1,116 @@
-#include "../include/mySimpleComputer.h"
 #include "../include/myTerm.h"
+#include "../include/mySimpleComputer.h"
 #include <stdio.h>
-int sc_mt_gotoXY(int x, int y) {
-  char buffer[32];
-  int len = snprintf(buffer, sizeof(buffer), "\033[%d;%dH", x, y);
-  if (write(STDOUT_FILENO, buffer, len) == -1) {
-      return -1;
-  }
-  return 0;
-}
+#include <stdint.h>
 
-// Функция для вывода содержимого одной ячейки памяти с учетом цветов
-void printCell(int address, enum colors fg, enum colors bg) {
+#define RED_TEXT "\x1b[31m"
+#define WHITE_BG "\x1b[47m"
+#define WHITE_TEXT "\x1b[37m"
+#define BLACK_BG "\x1b[40m"
+#define RESET_COLORS "\x1b[0m"
+
+void printMemoryHex() {
+    printf("\x1b[2;1H");
+
     int value;
-    if (sc_memoryGet(address, &value)) {
-        printf("Invalid address.\n");
-        return;
+    sc_memoryGet(0, &value);
+    printf(RED_TEXT WHITE_BG "%04X  " RESET_COLORS, value & 0xFFFF);
+
+    printf(WHITE_TEXT BLACK_BG);
+    for (int i = 1; i < MEMORY_SIZE; i++) {
+        if (i % 10 == 0) {
+            printf("\n\x1b[%d;1H", 2 + i / 10);
+        }
+        sc_memoryGet(i, &value);
+        printf("%c%04X  ", (value & 0x8000) ? '-' : '+', value & 0xFFFF);
     }
+    printf(RESET_COLORS "\n");
+}
+void printDecodedCommand(int command) {
+    // Пример: декодирование и вывод команды в формате "+XX : YY"
+    int opcode = (command >> 7) & 0x1F; // Получаем код операции (5 бит)
+    int operand = command & 0x7F;       // Получаем операнд (7 бит)
+    printf("+%02X : %02X\n", opcode, operand);
+}
+void printAccumulator() {
+    mt_gotoXY(2, 75);
+    printf(RED_TEXT BLACK_BG "Аккумулятор\n");
+    mt_setfgcolor(WHITE);
+    mt_setbgcolor(BLACK);
 
-    // Установка цветов
-    mt_setfgcolor(fg);
-    mt_setbgcolor(bg);
-
-    // Вычисление позиции для вывода
-    int row = address / 10 + 2; // Примерное расположение блока "Оперативная память"
-    int col = (address % 10) * 5 + 2;
-
-    // Перемещение курсора и вывод значения
-    sc_mt_gotoXY(row, col);
-    printf("%04X", value);
-
-    // Сброс цветов
+    int acc;
+    sc_accumulatorGet(&acc);
+    mt_gotoXY(3, 70);
+    printf("(SC): %+d  | Hex: %04X \n", acc, acc & 0x7FFF);
     mt_setdefaultcolor();
 }
 
-// Функция для вывода содержимого регистра флагов
-void printFlags(void) {
-    int flags[5];
-    sc_regGet(FLAG_OVERFLOW, &flags[0]);
-    sc_regGet(FLAG_DIVISION_BY_ZERO, &flags[1]);
-    sc_regGet(FLAG_MEMORY_ERROR, &flags[2]);
-    sc_regGet(FLAG_INVALID_COMMAND, &flags[3]);
-    sc_regGet(FLAG_IGNORE_CLOCK, &flags[4]);
+void printFlags() {
+    mt_gotoXY(2, 110);
+    printf(RED_TEXT BLACK_BG "Регистр флагов\n");
+    mt_setfgcolor(WHITE);
+    mt_setbgcolor(BLACK);
 
-    // Перемещение курсора в блок "Регистр флагов"
-    sc_mt_gotoXY(15, 2); // Примерное расположение
-    printf("Flags: %c %c %c %c %c", flags[0] ? 'O' : '_', flags[1] ? 'D' : '_',
-          flags[2] ? 'M' : '_', flags[3] ? 'I' : '_', flags[4] ? 'C' : '_');
+    int p, zero, m, t, e;
+    sc_regGet(FLAG_OVERFLOW, &p);
+    sc_regGet(FLAG_INVALID_COMMAND, &zero);
+    sc_regGet(FLAG_MEMORY_ERROR, &m);
+    sc_regGet(FLAG_IGNORE_CLOCK, &t);
+    e = 0;
+
+    mt_gotoXY(3, 100);
+    printf("Flags:| %c | %c | %c | %c | %c |\n",
+           p ? 'P' : '_', zero ? '0' : '_', m ? 'M' : '_', t ? 'T' : '_', e ? 'E' : '_');
+    mt_setdefaultcolor();
 }
 
-// Функция для вывода декодированной команды
-void printDecodedCommand(int value) {
-    int sign, command, operand;
-    if (sc_commandDecode(value, &sign, &command, &operand)) {
-        // Перемещение курсора в блок "Редактируемая ячейка (формат)"
-        sc_mt_gotoXY(18, 2); // Примерное расположение
-        printf("Invalid command format.");
-        return;
-    }
+void printCounters() {
+    mt_gotoXY(5, 75);
+    printf(RED_TEXT BLACK_BG "Счетчик команд\n");
+    mt_setfgcolor(WHITE);
+    mt_setbgcolor(BLACK);
 
-    // Перемещение курсора
-    sc_mt_gotoXY(18, 2);
-    printf("Decoded command: %c %02X %02X", sign ? '-' : '+', command, operand);
+    int ic;
+    sc_icounterGet(&ic);
+
+    mt_gotoXY(6, 70);
+    printf("T:00 IC:%04X \n", ic & 0x7FFF);
+    mt_setdefaultcolor();
+    mt_gotoXY(30, 1);
 }
 
-// Функция для вывода значения аккумулятора
-void printAccumulator(void) {
-    int value;
-    sc_accumulatorGet(&value);
+void in_out(int addresses[5]) {
+    printf("\x1b[20;1H");
+    printf(RED_TEXT BLACK_BG "Ввод-вывод\n");
+    printf(WHITE_TEXT BLACK_BG);
 
-    // Перемещение курсора в блок "Аккумулятор"
-    sc_mt_gotoXY(20, 2); // Примерное расположение
-    printf("Accumulator: %04X", value);
-}
-
-// Функция для вывода значения счетчика команд
-void printCounters(void) {
-    int value;
-    sc_icounterGet(&value);
-
-    // Перемещение курсора в блок "Счетчик команд"
-    sc_mt_gotoXY(22, 2); // Примерное расположение
-    printf("Instruction Counter: %04X", value);
-}
-
-// Функция для вывода строки в блок "IN—OUT"
-void printTerm(int address, int input) {
-    static int history[4] = {0}; // История последних 4 строк
-    static int index = 0;
-
-    // Обновление истории
-    history[index] = address;
-    index = (index + 1) % 4;
-
-    // Перемещение курсора в блок "IN—OUT"
-    sc_mt_gotoXY(24, 2); // Примерное расположение
-
-    // Вывод истории
-    for (int i = 0; i < 4; i++) {
-        int pos = (index + i) % 4;
-        if (input && i == 0) {
-            printf("> %04X\n", history[pos]);
-        } else {
-            printf("  %04X\n", history[pos]);
+    for (int i = 0; i < 5; i++) {
+        int address = addresses[i];
+        if (address < 0 || address >= MEMORY_SIZE) {
+            printf("Адрес %02X недопустим\n", address);
+            continue;
         }
+
+        int value;
+        sc_memoryGet(address, &value);
+        printf("%02X> %c%04X\n", address, (value & 0x8000) ? '-' : '+', value & 0x7FFF);
     }
+    printf(RESET_COLORS);
 }
 
-// Функция для вывода декодированной команды из счетчика команд
-void printCommand(void) {
-    int address;
-    sc_icounterGet(&address);
+void printCommandPanel() {
+    mt_gotoXY(8, 75);
+    printf(RED_TEXT BLACK_BG "Команда\n");
+    mt_setfgcolor(WHITE);
+    mt_setbgcolor(BLACK);
 
-    int value;
-    if (sc_memoryGet(address, &value)) {
-        // Перемещение курсора в блок "Команда"
-        sc_mt_gotoXY(26, 2); // Примерное расположение
-        printf("! Invalid address.");
-        return;
-    }
+    mt_gotoXY(9, 70);
+    
+    // Получаем текущую команду (например, из памяти или регистра)
+    int currentCommand;
+    sc_memoryGet(sc_icounterGet(NULL), &currentCommand);
+    printDecodedCommand(currentCommand); // Выводим декодированную команду
 
-    int sign, command, operand;
-    if (sc_commandDecode(value, &sign, &command, &operand)) {
-        // Перемещение курсора
-        sc_mt_gotoXY(26, 2);
-        printf("! Invalid command format.");
-        return;
-    }
-
-    // Перемещение курсора
-    sc_mt_gotoXY(26, 2);
-    printf("Command: %c %02X %02X", sign ? '-' : '+', command, operand);
+    mt_setdefaultcolor();
+    mt_gotoXY(30, 1);
 }

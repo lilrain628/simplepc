@@ -3,7 +3,12 @@
 
 #include <unistd.h> // Для write
 #include <stdio.h>  // Для printf
-#include <sys/ioctl.h> // Для ioctl
+#ifdef _WIN32
+    // Windows не использует ioctl.h, вместо него можно использовать другие API
+#else
+    #include <sys/ioctl.h>
+#endif
+
 #include <stdlib.h> // Для exit
 
 // Перечисление для цветов

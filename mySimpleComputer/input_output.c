@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #define RED_TEXT "\x1b[31m"
+#define GREEN_TEXT "\x1b[32m"
 #define WHITE_BG "\x1b[47m"
 #define WHITE_TEXT "\x1b[37m"
 #define BLACK_BG "\x1b[40m"
@@ -47,7 +48,7 @@ void printEditableCell() {
     // Приводим memory[0] к знаковому типу
     int16_t signed_value = (int16_t)(memory[0] & 0xFFFF);
 
-    printf(WHITE_TEXT BLACK_BG "Dec: %d  | Oct: %o  | Hex: %04X  | Bin: ", signed_value, signed_value, signed_value & 0xFFFF);
+    printf(WHITE_TEXT BLACK_BG "dec: %d  | oct: %o  | hex: %04X   bin: ", signed_value, signed_value, signed_value & 0xFFFF);
     for (int i = 14; i >= 0; i--) {  // 15 бит (знак + 14 бит данных)
         printf("%d", (signed_value >> i) & 1);
     }
@@ -64,8 +65,8 @@ void printAccumulator() {
     int acc;
     sc_accumulatorGet(&acc);
 
-    mt_gotoXY(3, 70);
-    printf("(SC): %+d  | Hex: %04X \n", acc, acc & 0x7FFF);
+    mt_gotoXY(3, 75);
+    printf("sc: %+d    hex: %04X \n", acc, acc & 0x7FFF);
     mt_setdefaultcolor();
 }
 
@@ -83,8 +84,8 @@ void printFlags() {
     sc_regGet(FLAG_INVALID_COMMAND     , &t);
     sc_regGet(FLAG_IGNORE_CLOCK        , &e);
 
-    mt_gotoXY(3, 100);
-    printf("Flags:| %c | %c | %c | %c | %c |",
+    mt_gotoXY(3, 110);
+    printf("%c   %c   %c   %c   %c ",
     p ? 'P' : '_', zero ? '0' : '_', m ? 'M' : '_', t ? 'T' : '_', e ? 'E' : '_');
     printf("\n");
     mt_setdefaultcolor();
@@ -100,18 +101,34 @@ void printCounters() {
     int ic;
     sc_icounterGet(&ic);
 
-    mt_gotoXY(6, 70);
-    printf("T:00 IC:%04X \n", ic & 0x7FFF);
+    mt_gotoXY(6, 75);
+    printf("T:00      IC:%04X \n", ic & 0x7FFF);
     mt_setdefaultcolor();
 
     mt_gotoXY(30, 1);
 }
 
+// Функция для отображения панели "Команда"
+void printCommandPanel() {
+    mt_gotoXY(5, 115);  // Позиция для вывода панели "Команда"
+    printf(RED_TEXT BLACK_BG "Команда\n");
+    mt_setfgcolor(WHITE);
+    mt_setbgcolor(BLACK);
+
+    // Пример команды в формате "+ 00 : 01"
+    mt_gotoXY(6, 115);
+    printf("+ 00 : 01\n");
+
+    mt_setdefaultcolor();
+    mt_gotoXY(30, 1);
+}
+
 void in_out(int addresses[5]) {
     printf("\x1b[20;1H");  // Перемещаем курсор на 20 строку, 1 столбец
-    printf(RED_TEXT BLACK_BG "Ввод-вывод\n");
-    printf(WHITE_TEXT BLACK_BG);
-
+    
+    // Заголовок: зеленый текст на белом фоне
+    printf(GREEN_TEXT WHITE_BG "IN--OUT" RESET_COLORS "\n");
+    
     for (int i = 0; i < 5; i++) {
         int address = addresses[i];
         if (address < 0 || address >= MEMORY_SIZE) {
@@ -125,24 +142,9 @@ void in_out(int addresses[5]) {
         // Определяем знак значения
         char sign = (value & 0x8000) ? '-' : '+';
 
-        // Выводим адрес и значение в формате "00> +1109"
-        printf("%02X> %c%04X\n", address, sign, value & 0x7FFF);
+        // Включаем белый фон только для выводимого текста
+        printf(BLACK_BG "%02X> %c%04X" RESET_COLORS "\n", 
+               address, sign, value & 0x7FFF);
     }
-
-    printf(RESET_COLORS);  // Сбрасываем цвета
 }
 
-// Функция для отображения панели "Команда"
-void printCommandPanel() {
-    mt_gotoXY(8, 75);  // Позиция для вывода панели "Команда"
-    printf(RED_TEXT BLACK_BG "Команда\n");
-    mt_setfgcolor(WHITE);
-    mt_setbgcolor(BLACK);
-
-    // Пример команды в формате "+ 00 : 01"
-    mt_gotoXY(9, 70);
-    printf("+ 00 : 01\n");
-
-    mt_setdefaultcolor();
-    mt_gotoXY(30, 1);
-}

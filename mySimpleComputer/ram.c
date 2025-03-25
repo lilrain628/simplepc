@@ -1,5 +1,4 @@
-#include "mySimpleComputer.h"
-static int memory[128];
+#include "../include/mySimpleComputer.h"
 
 int
 sc_memoryInit (void)

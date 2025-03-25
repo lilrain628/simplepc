@@ -3,87 +3,48 @@
 #include <time.h>
 #include "../include/mySimpleComputer.h"
 #include "../include/myTerm.h"
+#define MEMORY_MAX_SIZE MEMORY_SIZE
 
-// Функция для заполнения памяти случайными значениями
-void fillRandomMemory() {
+
+void fillMemoryWithRandomValues(int count)
+{
     srand(time(NULL)); // Инициализация генератора случайных чисел
-    for (int i = 0; i < MEMORY_SIZE; i++) {
-        int randomValue = rand() % 65536; // Генерация случайного числа от 0 до 65535
-        if (rand() % 2 == 0) { // Случайно делаем число отрицательным
-            randomValue = -randomValue;
+
+    for (int i = 0; i < count && i < MEMORY_MAX_SIZE; i++)
+    {
+        int randomValue;
+
+        // Заполняем только первые 10 ячеек
+        if (i < 10)
+        {
+            if (i == 0)
+            {
+                randomValue = 16383; // Первая ячейка: 16383
+            }
+            else if (i == 1)
+            {
+                randomValue = -16384; // Вторая ячейка: -16384
+            }
+            else
+            {
+                // Генерация случайного числа от 0 до 32767
+                randomValue = rand() % 32768;
+
+                // Сдвигаем диапазон в отрицательную сторону, вычитая 16384
+                randomValue -= 16384;
+            }
         }
+        else
+        {
+            // Остальные ячейки заполняем нулями
+            randomValue = 0;
+        }
+
+        // Записываем значение в память
         sc_memorySet(i, randomValue);
     }
 }
 
-// Функция для отображения памяти в шестнадцатеричном виде
-void printMemoryHex() {
-    printf("Memory contents (hex):\n");
-    for (int i = 0; i < MEMORY_SIZE; i++) {
-        int value;
-        sc_memoryGet(i, &value);
-        if (value >= 0) {
-            printf("+%04X ", value); // Положительное значение с знаком +
-        } else {
-            printf("-%04X ", -value); // Отрицательное значение с знаком -
-        }
-        if ((i + 1) % 10 == 0) {
-            printf("\n");
-        }
-    }
-    printf("\n");
-}
-
-// Функция для отображения редактируемой ячейки (например, первая ячейка)
-void printEditableCell() {
-    int value;
-    sc_memoryGet(0, &value); // Получаем значение из первой ячейки памяти
-    printf("Editable Cell (Address 0): ");
-    if (value >= 0) {
-        printf("+%04X\n", value);
-    } else {
-        printf("-%04X\n", -value);
-    }
-}
-
-// Функция для вывода консоли с блоками памяти, регистров и других данных
-void print_console(int current_cell) {
-    // Очистка экрана
-    mt_clrscr();
-
-    // Вывод блока "Оперативная память"
-    for (int i = 0; i < MEMORY_SIZE; i++) {
-        if (i == current_cell) {
-            // Инверсный режим для текущей ячейки
-            mt_setbgcolor(WHITE);
-            mt_setfgcolor(BLACK);
-        }
-        printCell(i, DEFAULT, DEFAULT);
-        if (i == current_cell) {
-            mt_setdefaultcolor();
-        }
-        if ((i + 1) % 10 == 0) {
-            printf("\n");
-        }
-    }
-
-    // Вывод блока "Регистр флагов"
-    printFlags();
-
-    // Вывод блока "Аккумулятор"
-    printAccumulator();
-
-    // Вывод блока "Счетчик команд"
-    printCounters();
-
-    // Вывод блока "IN—OUT"
-    for (int i = 0; i < 7; i++) {
-        printTerm(i * 10, 0); // Примерные адреса
-    }
-
-    // Вывод блока "Команда"
-    printCommand();
-}
 
 int main() {
     // Очищаем экран
@@ -93,7 +54,7 @@ int main() {
     sc_memoryInit();
 
     // Заполнение памяти случайными значениями
-    fillRandomMemory();
+    fillMemoryWithRandomValues(MEMORY_MAX_SIZE);
 
     // Установка значений в память
     sc_memorySet(0, -1);
@@ -126,14 +87,9 @@ int main() {
     // Отображение счетчика команд
     printCounters();
 
-    int addresses[5] = {0x00, 0x01, 0x02, 0x03, 0x04};
-    in_out(addresses);
+    // int addresses[5] = {0x00, 0x01, 0x02, 0x03, 0x04};
+    // in_out(addresses);
 
-    // Вывод панели команды
     printCommandPanel();
-
-    // Вывод консоли (например, для ячейки 5)
-    print_console(5);
-
     return 0;
 }

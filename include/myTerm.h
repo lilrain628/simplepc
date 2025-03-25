@@ -34,4 +34,11 @@ int mt_setdefaultcolor(void); // Сброс цветов к значениям �
 int mt_setcursorvisible(int value); // Управление видимостью курсора
 int mt_delline(void); // Очистка текущей строки
 
+
+void printMemoryHex(void);
+void printEditableCell(void);
+void printAccumulator(void);
+void printFlags(void);
+void printCounters(void);
+void printCommandPanel(void);
 #endif

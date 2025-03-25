@@ -4,6 +4,9 @@
 #include "../include/myTerm.h"
 // Память
 #define MEMORY_SIZE 128
+extern int memory[MEMORY_SIZE];
+
+
 
 int sc_memoryInit (void);
 int sc_memorySet (int address, int value);

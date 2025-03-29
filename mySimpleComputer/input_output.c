@@ -147,4 +147,12 @@ void in_out(int addresses[5]) {
                address, sign, value & 0x7FFF);
     }
 }
-
+void printDecodedCommand(int value) {
+    int sign, command, operand;
+    sc_commandDecode(value, &sign, &command, &operand);
+    
+    printf("Decoded command:\n");
+    printf("Sign: %s\n", sign ? "-" : "+");
+    printf("Command: %d (0x%X)\n", command, command);
+    printf("Operand: %d (0x%%X)\n", operand, operand);
+}

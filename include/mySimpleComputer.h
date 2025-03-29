@@ -4,6 +4,7 @@
 #include "../include/myTerm.h"
 // Память
 #define MEMORY_SIZE 128
+#define MEMORY_MAX_SIZE MEMORY_SIZE
 extern int memory[MEMORY_SIZE];
 
 
@@ -47,3 +48,8 @@ void printFlags (void);
 void printDecodedCommand (int value);
 void printAccumulator (void);
 void printCounters (void);
+// Добавьте эти прототипы
+void printMemoryHex(void);
+void printEditableCell(void);
+void printCommandPanel(void);
+void in_out(int addresses[5]);

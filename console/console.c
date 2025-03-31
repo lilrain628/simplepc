@@ -15,7 +15,7 @@ void fillMemoryWithRandomValues(int count) {
         // Заполняем только первые 10 ячеек
         if (i < 10) {
             if (i == 0) {
-                randomValue = 16383; // Первая ячейка: 16383
+                randomValue = 1; // Первая ячейка: 
             } else if (i == 1) {
                 randomValue = -16384; // Вторая ячейка: -16384
             } else {
@@ -68,7 +68,7 @@ int main() {
     printCounters();
 
     // Читаем значения из памяти для вывода IN-OUT
-    int addresses[5] = {0x00, 0x01, 0x02, 0x03, 0x04};
+    int addresses[5] = {0x00, 0x020, 0x039, 0x040, 0x057};
     in_out(addresses);
 
     // Отображение панели "Команда"

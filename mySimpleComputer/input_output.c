@@ -16,26 +16,32 @@ void printMemoryHex() {
     printf("\x1b[2;1H");  // Перемещаем курсор на 2 строку, 1 столбец
 
     // Первая ячейка: красный текст на белом фоне
-    printf(RED_TEXT WHITE_BG "%04X  " RESET_COLORS, memory[0] & 0xFFFF);  // Маска для 16 бит
+    printf(RED_TEXT WHITE_BG);
+    if (memory[0] & 0x8000) {
+        printf("-");
+    } else {
+        printf("+");
+    }
+    printf("%04X  " RESET_COLORS, memory[0] & 0x7FFF);  // Маска для 16 бит
 
     // Остальные ячейки: белый текст на черном фоне
     printf(WHITE_TEXT BLACK_BG);
-for (int i = 1; i < MEMORY_SIZE; i++) {
-    if (i % 10 == 0) {  // Переход на новую строку каждые 10 ячеек
-        printf("\n\x1b[%d;1H", 2 + i / 10);  // Перемещаем курсор на новую строку
-    }
+    for (int i = 1; i < MEMORY_SIZE; i++) {
+        if (i % 10 == 0) {  // Переход на новую строку каждые 10 ячеек
+            printf("\n\x1b[%d;1H", 2 + i / 10);  // Перемещаем курсор на новую строку
+        }
 
-    // Проверяем знаковый бит (15-й бит)
-    if (memory[i] & 0x8000) {  // Если знаковый бит установлен
-        printf("-");  // Отрицательное число
-    } else {
-        printf("+");  // Положительное число
-    }
+        // Проверяем знаковый бит (15-й бит)
+        if (memory[i] & 0x8000) {  // Если знаковый бит установлен
+            printf("-");  // Отрицательное число
+        } else {
+            printf("+");  // Положительное число
+        }
 
-    // Выводим значение в формате %04X (16-битное шестнадцатеричное число)
-    printf("%04X  ", memory[i] & 0xFFFF);  // Маска для 16 бит
-}
-printf(RESET_COLORS "\n");  // Сбрасываем цвета
+        // Выводим значение в формате %04X (16-битное шестнадцатеричное число)
+        printf("%04X  ", memory[i] & 0xFFFF);  // Маска для 16 бит
+    }
+    printf(RESET_COLORS "\n");  // Сбрасываем цвета
 }
 
 // Функция для отображения редактируемой ячейки
@@ -43,21 +49,32 @@ void printEditableCell() {
     printf("\x1b[17;1H");  // Перемещаем курсор на 17 строку, 1 столбец
 
     printf(RED_TEXT WHITE_BG "Редактируемая ячейка (формат)\n");
-    // Редактируемая ячейка: красный текст на белом фоне
 
-    // Приводим memory[0] к знаковому типу
+    // Получаем значение ячейки как 16-битное число со знаком
     int16_t signed_value = (int16_t)(memory[0] & 0xFFFF);
+    // Полное 16-битное представление
+    uint16_t unsigned_value = memory[0] & 0x7FFF;
 
-    printf(WHITE_TEXT BLACK_BG "dec: %d  | oct: %o  | hex: %04X   bin: ", signed_value, signed_value, signed_value & 0xFFFF);
-    for (int i = 14; i >= 0; i--) {  // 15 бит (знак + 14 бит данных)
-        printf("%d", (signed_value >> i) & 1);
+    // Десятичное значение (со знаком)
+    printf(WHITE_TEXT BLACK_BG "dec: %d  | ", signed_value);
+
+    // Восьмеричное значение (полное 16-битное представление)
+    printf("oct: %6o  | ", unsigned_value);
+
+    // Шестнадцатеричное значение (полное 16-битное представление)
+    printf("hex: %04X   | ", unsigned_value);
+
+    // Двоичное значение (все 16 бит)
+    printf("bin: ");
+    for (int i = 14; i >= 0; i--) {
+        printf("%d", (unsigned_value >> i) & 1);
     }
     printf(RESET_COLORS "\n");
 }
 
 // Функция для отображения аккумулятора
 void printAccumulator() {
-    mt_gotoXY(2, 75);  // Позиция для вывода аккумулятора
+    mt_gotoXY(2, 80);  // Позиция для вывода аккумулятора
     printf(RED_TEXT BLACK_BG "Аккумулятор\n");
     mt_setfgcolor(WHITE);
     mt_setbgcolor(BLACK);
@@ -140,11 +157,11 @@ void in_out(int addresses[5]) {
         int16_t value = (int16_t)(memory[address] & 0xFFFF);
 
         // Определяем знак значения
-        char sign = (value & 0x8000) ? '-' : '+';
+         char sign = (value & 0x8000) ? '-' : '+';
 
         // Включаем белый фон только для выводимого текста
         printf(BLACK_BG "%02X> %c%04X" RESET_COLORS "\n", 
-               address, sign, value & 0x7FFF);
+               address,sign,  value & 0x7FFF);
     }
 }
 void printDecodedCommand(int value) {

@@ -15,7 +15,7 @@ void fillMemoryWithRandomValues(int count) {
         // Заполняем только первые 10 ячеек
         if (i < 10) {
             if (i == 0) {
-                randomValue = 1; // Первая ячейка: 
+                randomValue = -1; // Первая ячейка: 
             } else if (i == 1) {
                 randomValue = -16384; // Вторая ячейка: -16384
             } else {

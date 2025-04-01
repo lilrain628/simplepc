@@ -1,6 +1,6 @@
 #include "../include/mySimpleComputer.h"
 static int accumulator = 0;
-static int instruction_counter = 0;
+static int icounter = 0;
 static int flag_register = 0;
 
 int
@@ -55,14 +55,18 @@ sc_accumulatorInit (void)
 int
 sc_accumulatorSet (int value)
 {
-  accumulator = value;
-  return 0;
+  if (value < 0xFFFF)
+    {
+      accumulator = value;
+      return 0;
+    }
+  return -1;
 }
 
 int
 sc_accumulatorGet (int *value)
 {
-  if (value == NULL)
+  if (*value >= 0xFFFF)
     {
       return -1;
     }
@@ -73,28 +77,28 @@ sc_accumulatorGet (int *value)
 int
 sc_icounterInit (void)
 {
-  instruction_counter = 0;
+  icounter = 0;
   return 0;
 }
 
 int
 sc_icounterSet (int value)
 {
-  if (value < 0 || value >= 128)
+  if (value < 0xFFFF)
     {
-      return -1;
+      icounter = value;
+      return 0;
     }
-  instruction_counter = value;
-  return 0;
+  return -1;
 }
 
 int
 sc_icounterGet (int *value)
 {
-  if (value == NULL)
+  if (*value >= 0xFFFF)
     {
       return -1;
     }
-  *value = instruction_counter;
+  *value = icounter;
   return 0;
 }

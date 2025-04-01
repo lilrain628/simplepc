@@ -83,7 +83,7 @@ void printAccumulator() {
     sc_accumulatorGet(&acc);
 
     mt_gotoXY(3, 75);
-    printf("sc: %+d    hex: %04X \n", acc, acc & 0x7FFF);
+    printf("sc: %04X     hex: %04X \n", acc, acc & 0x7FFF);
     mt_setdefaultcolor();
 }
 
@@ -127,14 +127,28 @@ void printCounters() {
 
 // Функция для отображения панели "Команда"
 void printCommandPanel() {
-    mt_gotoXY(5, 115);  // Позиция для вывода панели "Команда"
+    int value = 0;
+    int sign = 0;
+    int command = 0;
+    int operand = 0;
+    char tmp[12]; // Увеличил размер для безопасности
+
+    sc_icounterGet(&value);
+    sc_commandDecode(value, &sign, &command, &operand);
+
+    if (command < 0 || command > 76) {
+        snprintf(tmp, sizeof(tmp), "! %02X : %02X", command, operand);
+    } else {
+        snprintf(tmp, sizeof(tmp), "+ %02X : %02X", command, operand);
+    }
+
+    mt_gotoXY(5, 115);
     printf(RED_TEXT BLACK_BG "Команда\n");
     mt_setfgcolor(WHITE);
     mt_setbgcolor(BLACK);
 
-    // Пример команды в формате "+ 00 : 01"
     mt_gotoXY(6, 115);
-    printf("+ 00 : 01\n");
+    printf("%s\n", tmp);
 
     mt_setdefaultcolor();
     mt_gotoXY(30, 1);
@@ -166,10 +180,15 @@ void in_out(int addresses[5]) {
 }
 void printDecodedCommand(int value) {
     int sign, command, operand;
-    sc_commandDecode(value, &sign, &command, &operand);
+
+    if (sc_commandDecode(value, &sign, &command, &operand) != 0) {
+        printf("Error decoding command\n");
+        return;
+    }
     
     printf("Decoded command:\n");
     printf("Sign: %s\n", sign ? "-" : "+");
     printf("Command: %d (0x%X)\n", command, command);
-    printf("Operand: %d (0x%%X)\n", operand, operand);
+    printf("Operand: %d (0x%X)\n", operand, operand);  // Исправлен формат вывода
 }
+

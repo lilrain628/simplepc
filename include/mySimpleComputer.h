@@ -1,12 +1,22 @@
+#pragma once
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "../include/myBigChars.h"
 #include "../include/myTerm.h"
+#define OFF 0
+#define ON 1
 // Память
 #define MEMORY_SIZE 128
+#define BIGC 36
+#define P 0b00000001
+#define O 0b00000010
+#define M 0b00000100
+#define T 0b00001000
+#define E 0b00010000
 #define MEMORY_MAX_SIZE MEMORY_SIZE
 extern int memory[MEMORY_SIZE];
-
+extern int font[BIGC];
 
 
 int sc_memoryInit (void);
@@ -53,3 +63,4 @@ void printMemoryHex(void);
 void printEditableCell(void);
 void printCommandPanel(void);
 void in_out(int addresses[5]);
+void printBigCell (int address, int bigchars[18][SIZE]);

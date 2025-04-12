@@ -1,8 +1,11 @@
+#pragma once
 #ifndef MYTERM_H
 #define MYTERM_H
 
 #include <unistd.h> // Для write
 #include <stdio.h>  // Для printf
+#include <termios.h>
+#include <fcntl.h>
 #ifdef _WIN32
     // Windows не использует ioctl.h, вместо него можно использовать другие API
 #else
@@ -13,16 +16,26 @@
 
 // Перечисление для цветов
 enum colors {
-    BLACK = 0,
-    RED,
-    GREEN,
-    YELLOW,
-    BLUE,
-    MAGENTA,
-    CYAN,
-    WHITE,
-    DEFAULT
-};
+    Fblack = 30,
+    Fred,
+    Fgreen,
+    Fyellow,
+    Fblue,
+    Fmagenta,
+    Fcyan,
+    Fgray,
+    Fdef = 39,
+  
+    Bblack = 40,
+    Bred,
+    Bgreen,
+    Byellow,
+    Bblue,
+    Bmagenta,
+    Bcyan,
+    Bgray,
+    Bdef = 49
+  };
 
 // Функции библиотеки
 int mt_clrscr(void); // Очистка экрана

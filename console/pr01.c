@@ -1,3 +1,4 @@
+#include <myBigChars.h>
 #include "mySimpleComputer.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,7 +7,7 @@
 // Константа для максимального размера памяти
 #define MEMORY_MAX_SIZE 130
 
-// Функция для заполнения памяти случайными значениями
+
 void
 fillMemoryWithRandomValues (int count)
 {
@@ -126,6 +127,9 @@ main ()
 
   // Повторный вывод флагов
   printFlags ();
+  
+
+
 
   return 0;
 }

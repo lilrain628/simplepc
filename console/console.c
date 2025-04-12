@@ -1,12 +1,17 @@
 #include <stdio.h>
+#include <fcntl.h>
+#include <sys/io.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <time.h>
 #include "../include/mySimpleComputer.h"
 #include "../include/myTerm.h"
+#include "myBigChars.h"
 #define MEMORY_MAX_SIZE MEMORY_SIZE
 
 // Функция для заполнения памяти случайными значениями
-void fillMemoryWithRandomValues(int count) {
+ void fillMemoryWithRandomValues(int count) {
     srand(time(NULL)); // Инициализация генератора случайных чисел
 
     for (int i = 0; i < count && i < MEMORY_MAX_SIZE; i++) {
@@ -35,7 +40,7 @@ void fillMemoryWithRandomValues(int count) {
     }
 }
 
-int main() {
+ int main() {
     // Очищаем экран
     mt_clrscr();
 
@@ -52,8 +57,24 @@ int main() {
     // Установка аккумулятора
     sc_accumulatorSet(500);
 
+    int bigchars[18][2];
+    
+    
+
+    FILE *f = fopen ("font.bin", "rb");
+    if (f == NULL)
+      {
+        printf ("failed to open file\n");
+        exit (EXIT_FAILURE);
+      }
+    fread (bigchars, sizeof (int), 18 * SIZE, f);
+    fclose (f);
+
     // Отображение памяти
     printMemoryHex();
+
+
+    printBigCell (0, bigchars);
 
     // Отображение редактируемой ячейки (первой ячейки)
     printEditableCell();
@@ -73,6 +94,10 @@ int main() {
 
     // Отображение панели "Команда"
     printCommandPanel();
+
+    
+    
+   
 
     return 0;
 }

@@ -1,7 +1,14 @@
 #include "../include/myTerm.h"
 #include "../include/mySimpleComputer.h"
+#include "../include/myBigChars.h"
+#include <myBigChars.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
+#include <sys/io.h>
+#include <sys/stat.h>
+#include <time.h>
 
 #define RED_TEXT "\x1b[31m"
 #define GREEN_TEXT "\x1b[32m"
@@ -76,8 +83,8 @@ void printEditableCell() {
 void printAccumulator() {
     mt_gotoXY(2, 80);  // Позиция для вывода аккумулятора
     printf(RED_TEXT BLACK_BG "Аккумулятор\n");
-    mt_setfgcolor(WHITE);
-    mt_setbgcolor(BLACK);
+    mt_setfgcolor(Fdef);
+    mt_setbgcolor(Bdef);
 
     int acc;
     sc_accumulatorGet(&acc);
@@ -91,8 +98,8 @@ void printAccumulator() {
 void printFlags() {
     mt_gotoXY(2, 110);  // Позиция для вывода флагов
     printf(RED_TEXT BLACK_BG "Регистр флагов\n");
-    mt_setfgcolor(WHITE);
-    mt_setbgcolor(BLACK);
+    mt_setfgcolor(Fdef);
+    mt_setbgcolor(Bdef);
 
     int p, zero, m = 0, t, e;
     sc_regGet(FLAG_OVERFLOW, &p);
@@ -112,8 +119,8 @@ void printFlags() {
 void printCounters() {
     mt_gotoXY(5, 75);
     printf(RED_TEXT BLACK_BG "Счетчик команд\n");
-    mt_setfgcolor(WHITE);
-    mt_setbgcolor(BLACK);
+    mt_setfgcolor(Fdef);
+    mt_setbgcolor(Bdef);
 
     int ic;
     sc_icounterGet(&ic);
@@ -144,8 +151,8 @@ void printCommandPanel() {
 
     mt_gotoXY(5, 115);
     printf(RED_TEXT BLACK_BG "Команда\n");
-    mt_setfgcolor(WHITE);
-    mt_setbgcolor(BLACK);
+    mt_setfgcolor(Fdef);
+    mt_setbgcolor(Bdef);
 
     mt_gotoXY(6, 115);
     printf("%s\n", tmp);
@@ -192,3 +199,103 @@ void printDecodedCommand(int value) {
     printf("Operand: %d (0x%X)\n", operand, operand);  // Исправлен формат вывода
 }
 
+void printBigCell(int address, int bigchars[18][SIZE])
+{
+    int value = 0;
+    int sign = 0;
+    int command = 0;
+    int operand = 0;
+
+    bc_box(62, 7, 107, 18, Fdef, Bdef, "Редактируемая ячейка (увеличено)", Fred, Bgray);
+
+    sc_memoryGet(address, &value);
+
+    // Попробуем декодировать, если команда корректна
+    // if ((value & 0x7FFF) != 0 && sc_commandDecode(value, &sign, &command, &operand) == 0) {
+    //     // ok, значения получены
+    // } else {
+    //     // если невалидная команда — просто показываем знак и обнуляем команду/операнд
+    //     sign = value >> 15;
+    //     command = 0;
+    //     operand = 0;
+    // }
+
+    // Знак
+    if (sign == 1) {
+        bc_printbigchar(bigchars[17], 9, 77, Fdef, Bdef); // '-'
+    } else {
+        bc_printbigchar(bigchars[16], 9, 77, Fdef, Bdef); // '+'
+    }
+
+    // Выделим цифры для вывода
+    int command1 = (command >> 4) & 0x0F;
+    int command2 = command & 0x0F;
+    int operand1 = (operand >> 4) & 0x0F;
+    int operand2 = operand & 0x0F;
+
+    // Выводим большие символы команды и операнда
+    bc_printbigchar(bigchars[1], 9, 90, Fdef, Bdef);
+    bc_printbigchar(bigchars[command2], 9, 99, Fdef, Bdef);
+    bc_printbigchar(bigchars[operand1], 9, 108, Fdef, Bdef);
+    bc_printbigchar(bigchars[operand2], 9, 117, Fdef, Bdef);
+
+    // Подпись под ячейкой
+    char buf[100];
+    mt_gotoXY(63, 17);
+    sprintf(buf, "\033[0;%dmНомер редактируемой ячейки: %d", Fblue, address);
+    write(1, buf, strlen(buf));
+
+    // Отладочная информация
+    if (sign == 1)
+        printf("DEBUG: value = -%04X, command = %02X, operand = %02X\n", value & 0x7FFF, command, operand);
+    else
+        printf("DEBUG: value = +%04X, command = %02X, operand = %02X\n", value & 0x7FFF, command, operand);
+}
+
+
+
+
+// void
+// printBigCell (int address, int bigchars[18][SIZE])
+// {
+//   int value = 0;
+//   int sign = 0;
+//   int command = 0;
+//   int operand = 0;
+  
+//   bc_box (62, 7, 107, 18, Fdef, Bdef, "Редактируемая ячейка (увеличено)", Fred,
+//           Bgray);
+
+//   sc_memoryGet (address, &value);
+//   //sc_commandDecode (value, &sign, &command, &operand);
+
+//   if (sign == 1)
+//     {
+//       bc_printbigchar (bigchars[17], 9, 63, Fdef, Bdef);
+//     }
+//   else
+//     {
+//       bc_printbigchar (bigchars[16], 9, 75, Fdef, Bdef);
+//     }
+
+//   int command1 = command >> 4;
+//   command = command & 0x0f;
+
+//   int operand1 = operand >> 4;
+//   operand = operand & 0x0f;
+
+//   bc_printbigchar (bigchars[command1], 9, 90, Fdef, Bdef);
+//   bc_printbigchar (bigchars[command], 9, 99, Fdef, Bdef);
+//   bc_printbigchar (bigchars[operand1], 9, 108, Fdef, Bdef);
+//    bc_printbigchar (bigchars[operand], 9, 117, Fdef, Bdef);
+//   char buf[100];
+//   mt_gotoXY (63, 17);
+//   sprintf (buf, "\033[0;%dmНомер редактируемой ячейки: %d", Fblue, address);
+  
+//   if (sign == 1)
+//     printf("DEBUG: value = -%04X, command = %02X, operand = %02X\n", value & 0x7FFF, command, operand);
+// else
+//     printf("DEBUG: value = +%04X, command = %02X, operand = %02X\n", value & 0x7FFF, command, operand);
+
+//   write (1, buf, strlen (buf));
+// }

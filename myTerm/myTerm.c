@@ -46,7 +46,7 @@ int mt_getscreensize(int *rows, int *cols) {
 
 // Установка цвета текста
 int mt_setfgcolor(enum colors color) {
-    if (color < BLACK || color > DEFAULT) {
+    if (color < Bdef || color > Fdef) {
         return -1;
     }
     printf("\033[3%dm", color);
@@ -56,7 +56,7 @@ int mt_setfgcolor(enum colors color) {
 
 // Установка цвета фона
 int mt_setbgcolor(enum colors color) {
-    if (color < BLACK || color > DEFAULT) {
+    if (color < Bdef || color > Fdef) {
         return -1;
     }
     printf("\033[4%dm", color);

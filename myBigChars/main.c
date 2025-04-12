@@ -1,3 +1,4 @@
+#include "bc_chars.h"
 #include "../include/myTerm.h"
 #include "myBigChars.h"
 #include <stdio.h>
@@ -23,8 +24,8 @@ int bc_bigcharwrite(int fd, int *big, int count) {
     return n == -1 ? -1 : 0;
 }
 
-int bc_box(int x1, int y1, int x2, int y2, enum Colors box_fg, enum Colors box_bg,
-           char *header, enum Colors header_fg, enum Colors header_bg) {
+int bc_box(int x1, int y1, int x2, int y2, enum colors box_fg, enum colors box_bg,
+           char *header, enum colors header_fg, enum colors header_bg) {
     int tmp, maxx, maxy, i;
     int len_utf = bc_strlen(header);
     int len_asc = strlen(header);
@@ -75,18 +76,18 @@ int bc_printA(char *str) {
 
 
 int
-bc_printbigchar (int bigchar[SIZE], int x, int y, enum Colors fg,
-                 enum Colors bg)
+bc_printbigchar (int bigchar[SIZE], int x, int y, enum colors fg,
+                 enum colors bg)
 {
   int rows = 0;
   int cols = 0;
 
   mt_getscreensize (&rows, &cols);
 
-  if (x + BYTE > cols || y + BYTE > rows || bigchar == NULL)
-    {
-      return -1;
-    }
+  // if (x + BYTE > cols || y + BYTE > rows || bigchar == NULL)
+  //   {
+  //     return -1;
+  //   }
 
   mt_gotoXY (x, y);
   mt_setbgcolor (bg);
@@ -167,5 +168,17 @@ bc_strlen (char *str)
     }
 
   return count;
+}
+
+int
+bc_getbigcharpos (int big[SIZE], int x, int y, int *value)
+{
+  if (value == NULL || big == NULL)
+    {
+      return -1;
+    }
+
+  *value = (big[y / sizeof (int)] >> (x + ((y % 4) * BYTE))) & 1;
+  return 0;
 }
 
